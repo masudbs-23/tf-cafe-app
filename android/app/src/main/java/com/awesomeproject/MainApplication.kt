@@ -9,9 +9,6 @@ import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
-import org.devio.rn.splashscreen.SplashScreenReactPackage;
-// react-native-splash-screen < 0.3.1
-import com.cboy.rn.splashscreen.SplashScreenReactPackage;
 class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
