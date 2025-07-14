@@ -67,7 +67,7 @@ const OffersScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f9fafb',
     paddingVertical: 16,
   },
   screenTitle: {

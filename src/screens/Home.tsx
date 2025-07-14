@@ -12,12 +12,14 @@ import { AppDispatch, RootState } from '../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import FoodScreen from './foods/FoodScreen';
 import OffersScreen from './offers/OffersScreen';
+import Header from '../components/Header';
 const HomeScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
+        <Header />
         <OffersScreen />
         <FoodScreen />
       </ScrollView>
@@ -28,7 +30,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f9fafb',
   },
   scrollContainer: {
     flex: 1,
@@ -60,7 +62,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  // ... keep your existing styles
 });
 
 export default HomeScreen;

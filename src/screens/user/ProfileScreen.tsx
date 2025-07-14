@@ -60,17 +60,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Loyalty Points Card */}
-        <View style={styles.loyaltyCard}>
-          <View style={styles.loyaltyHeader}>
-            <Icon name="loyalty" size={24} color="#FFD700" />
-            <Text style={styles.loyaltyTitle}>Foodie Rewards</Text>
-          </View>
-          <Text style={styles.loyaltyPoints}>{staticUserData.loyaltyPoints} pts</Text>
-          <Text style={styles.loyaltySubtext}>
-            {1500 - staticUserData.loyaltyPoints} pts until your next free meal
-          </Text>
-        </View>
+
 
         {/* Profile Options Section */}
         <View style={styles.menuSection}>
@@ -82,7 +72,7 @@ const ProfileScreen = () => {
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.recentOrders} orders</Text>
-              <Icon name="chevron-right" size={24} color="#999" />
+
             </View>
           </View>
 
@@ -94,7 +84,7 @@ const ProfileScreen = () => {
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.paymentMethods} cards</Text>
-              <Icon name="chevron-right" size={24} color="#999" />
+
             </View>
           </View>
 
@@ -108,7 +98,7 @@ const ProfileScreen = () => {
               <Text style={styles.itemValue} numberOfLines={1} ellipsizeMode="tail">
                 {staticUserData.address}
               </Text>
-              <Icon name="chevron-right" size={24} color="#999" />
+
             </View>
           </View>
 
@@ -118,9 +108,7 @@ const ProfileScreen = () => {
               <Icon name="settings" size={24} color="#FF6B6B" />
               <Text style={styles.itemTitle}>Settings</Text>
             </View>
-            <View style={styles.itemRight}>
-              <Icon name="chevron-right" size={24} color="#999" />
-            </View>
+
           </View>
         </View>
 
@@ -136,7 +124,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#f9fafb',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -145,7 +133,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 24,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     marginBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',
@@ -184,7 +172,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   loyaltyCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
@@ -213,7 +201,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   menuSection: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderRadius: 12,
     marginHorizontal: 16,
     marginBottom: 24,
@@ -249,14 +237,14 @@ const styles = StyleSheet.create({
   logoutButton: {
     marginHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#FFF',
+    backgroundColor: '#FF6B6B',
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#FF6B6B',
   },
   logoutButtonText: {
-    color: '#FF6B6B',
+    color: '#fff',
     fontWeight: '600',
     fontSize: 16,
   },

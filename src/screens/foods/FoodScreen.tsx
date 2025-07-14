@@ -78,7 +78,7 @@ const FoodScreen = () => {
   return (
     <View style={styles.container}>
       {/* Search Input */}
-      <View style={styles.searchContainer}>
+      {/* <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search foods..."
@@ -90,7 +90,7 @@ const FoodScreen = () => {
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Categories Filter */}
       <View style={styles.filterSection}>
@@ -180,7 +180,7 @@ const FoodScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f9fafb',
     paddingHorizontal: 8,
   },
   center: {
@@ -192,25 +192,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
   },
   searchInput: {
     flex: 1,
-    height: 40,
+    height: 50,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#fff',
     borderRadius: 14,
     paddingHorizontal: 16,
     marginRight: 8,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
     padding: 5
   },
   searchButton: {
@@ -226,7 +218,7 @@ const styles = StyleSheet.create({
   },
   filterSection: {
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     marginBottom: 8,
     paddingHorizontal: 16,
   },
@@ -304,11 +296,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: CARD_MARGIN,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+
   },
   favoriteButton: {
     position: 'absolute',
