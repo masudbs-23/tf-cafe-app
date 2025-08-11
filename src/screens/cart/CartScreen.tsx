@@ -143,32 +143,32 @@ const CartScreen = () => {
                 </View>
               ))}
             </View>
-          </ScrollView>
 
-          {/* Checkout Footer */}
-          <View style={styles.checkoutFooter}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total</Text>
-              <Text style={styles.totalPrice}>৳{totalPrice.toFixed(2)}</Text>
-            </View>
-
-            {totalPrice < 500 && (
-              <View style={styles.freeShippingBar}>
-                <View style={[styles.progressBar, { width: `${(totalPrice / 500) * 100}%` }]} />
-                <Text style={styles.freeShippingText}>
-                  Add ৳{(500 - totalPrice).toFixed(2)} more for free shipping
-                </Text>
+            {/* Checkout Footer */}
+            <View style={styles.checkoutFooter}>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Total</Text>
+                <Text style={styles.totalPrice}>৳{totalPrice.toFixed(2)}</Text>
               </View>
-            )}
 
-            <TouchableOpacity
-              style={styles.checkoutButton}
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('Checkout')}
-            >
-              <Text style={styles.checkoutText}>Proceed to Checkout</Text>
-            </TouchableOpacity>
-          </View>
+              {totalPrice < 500 && (
+                <View style={styles.freeShippingBar}>
+                  <View style={[styles.progressBar, { width: `${(totalPrice / 500) * 100}%` }]} />
+                  <Text style={styles.freeShippingText}>
+                    Add ৳{(500 - totalPrice).toFixed(2)} more for free shipping
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={styles.checkoutButton}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Checkout')}
+              >
+                <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </>
       )}
     </View>
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    paddingBottom: 120, // Space for fixed footer
+    paddingBottom: 20, // Reduced padding since footer is now inline
   },
   emptyCartContainer: {
     flex: 1,
@@ -242,11 +242,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#22C55E',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#16a34a',
   },
   continueShoppingText: {
     color: '#ffffff',
@@ -361,18 +363,12 @@ const styles = StyleSheet.create({
     color: '#1f2937',
   },
   checkoutFooter: {
-    position: 'absolute',
-    bottom: 0,
-    left: 10,
-    right: 10,
     backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 20,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -417,11 +413,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
   },
   checkoutText: {
     color: '#ffffff',

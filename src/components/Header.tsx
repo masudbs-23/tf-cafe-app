@@ -46,17 +46,6 @@ const Header = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          {/* <Feather name="search" size={20} color="#888" style={styles.searchIcon} /> */}
-          <TextInput
-            placeholder="Search for restaurants or dishes"
-            placeholderTextColor="#888"
-            style={styles.searchInput}
-            returnKeyType="search"
-          />
-        </View>
-
         {/* Promo Banner */}
         <View style={styles.promoContainer}>
           <Text style={styles.promoText}> {userData.promo.text} </Text>

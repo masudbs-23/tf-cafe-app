@@ -9,6 +9,7 @@ import CustomSplashScreen from '../components/CustomSplashScreen';
 import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
 import AuthNavigator from './AuthNavigator';
 import BottomTabNavigator from './BottomTabNavigator';
+import CheckoutScreen from '../screens/checkout/CheckoutScreen';
 
 const Stack = createStackNavigator();
 
@@ -50,6 +51,7 @@ const MainNavigator: React.FC = () => {
           // Authenticated user flow
           <>
             <Stack.Screen name="Main" component={BottomTabNavigator} />
+            <Stack.Screen name="Checkout" component={CheckoutScreen} />
           </>
         ) : (
           // Non-authenticated user flow
