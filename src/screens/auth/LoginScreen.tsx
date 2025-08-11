@@ -9,35 +9,42 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
-  Alert
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigationTypes';
-import { loginUser } from '../../redux/reducers/auth/authSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+
+type LoginNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 const LoginScreen: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<LoginNavigationProp>();
+  const { login, state } = useAuth();
+  const { showToast } = useToast();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const { isAuthenticated, status } = useSelector((state: RootState) => state.user);
-  const isLoading = status === 'loading';
-  const handleLogin = () => {
+
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      showToast('Please enter both email and password', 'error');
       return;
     }
-    dispatch(loginUser({ email, password }));
-  };
-  useEffect(() => {
-    if (isAuthenticated === 'success') {
-      navigation.navigate('Main');
+
+    try {
+      await login(email, password);
+      showToast('Login successful!', 'success');
+    } catch (error: any) {
+      showToast(error.message || 'Login failed. Please try again.', 'error');
     }
-  }, [isAuthenticated, navigation]);
+  };
+
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      navigation.replace('Main');
+    }
+  }, [state.isAuthenticated, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,8 +61,10 @@ const LoginScreen: React.FC = () => {
           <View style={styles.content}>
             <View style={styles.header}>
               <View style={styles.logoContainer}>
-                <View style={styles.logoCircle} />
-                <Text style={styles.logoTitle}>TR-Cafe</Text>
+                <View style={styles.logoCircle}>
+                  <Text style={styles.logoIcon}>🍕</Text>
+                </View>
+                <Text style={styles.logoTitle}>FoodApp</Text>
               </View>
             </View>
 
@@ -86,31 +95,31 @@ const LoginScreen: React.FC = () => {
               <TouchableOpacity
                 style={styles.loginButton}
                 onPress={handleLogin}
-                disabled={isLoading}
+                disabled={state.isLoading}
               >
-                {isLoading ? (
+                {state.isLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.loginButtonText}>Login</Text>
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
+              <TouchableOpacity style={styles.socialButton} disabled={state.isLoading}>
                 <Text style={styles.socialButtonText}>Continue with Facebook</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
+              <TouchableOpacity style={styles.socialButton} disabled={state.isLoading}>
                 <Text style={styles.socialButtonText}>Continue with Google</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity disabled={isLoading}>
+              <TouchableOpacity disabled={state.isLoading}>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account?</Text>
-              <TouchableOpacity disabled={isLoading} onPress={() => navigation.navigate('Register')}>
+              <TouchableOpacity disabled={state.isLoading} onPress={() => navigation.navigate('Register')}>
                 <Text style={styles.signUpText}>Sign Up</Text>
               </TouchableOpacity>
             </View>
@@ -120,10 +129,6 @@ const LoginScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-
-
-export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -158,15 +163,18 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 18,
-    backgroundColor: '#E91E63',
+    backgroundColor: '#22C55E',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
-    shadowColor: '#E91E63',
+    shadowColor: '#22C55E',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 10,
+  },
+  logoIcon: {
+    fontSize: 24,
   },
   logoTitle: {
     fontSize: 28,
@@ -174,7 +182,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     letterSpacing: 0.5,
   },
-
   form: {
     marginBottom: 20,
   },
@@ -187,27 +194,21 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     height: 50,
   },
-  inputIcon: {
-    marginRight: 10,
-  },
   input: {
     flex: 1,
     height: '100%',
     fontSize: 16,
     color: '#333',
   },
-  passwordToggle: {
-    padding: 5,
-  },
   loginButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
     height: 50,
     borderRadius: 12,
     marginBottom: 15,
-    shadowColor: '#00b894',
+    shadowColor: '#22C55E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   forgotPassword: {
-    color: '#E91E63',
+    color: '#22C55E',
     textAlign: 'center',
     fontSize: 14,
     marginTop: 10,
@@ -252,7 +253,9 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   signUpText: {
-    color: '#E91E63',
+    color: '#22C55E',
     fontWeight: '600',
   },
 });
+
+export default LoginScreen;

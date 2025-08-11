@@ -8,14 +8,11 @@ import {
   TouchableOpacity,
   Alert
 } from 'react-native';
-import { AppDispatch, RootState } from '../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
 import FoodScreen from './foods/FoodScreen';
 import OffersScreen from './offers/OffersScreen';
 import Header from '../components/Header';
+
 const HomeScreen = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer}>

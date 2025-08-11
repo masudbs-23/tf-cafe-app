@@ -1,97 +1,214 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# FoodApp - React Native Project
 
-# Getting Started
+A modern food delivery app built with React Native, featuring Context API for state management, React Query for API calls, and a complete authentication flow with onboarding.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🚀 Features
 
-## Step 1: Start Metro
+- **Context API Authentication**: Complete auth flow with login, register, and OTP verification
+- **React Query Integration**: Efficient API calls with caching and state management
+- **Onboarding Screen**: First-time user experience with beautiful animations
+- **Splash Screen**: Professional app launch experience
+- **Modern UI/UX**: Clean and intuitive design with consistent theming
+- **TypeScript**: Full type safety throughout the application
+- **AsyncStorage**: Persistent data storage for user preferences
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📱 Screens
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Authentication Flow
+- **Splash Screen**: App launch with animated logo
+- **Onboarding**: First-time user introduction (shows only on first install)
+- **Login Screen**: User authentication with email/password
+- **Register Screen**: New user registration with OTP verification
+- **OTP Verification**: 6-digit code verification
 
-```sh
-# Using npm
-npm start
+### Main App
+- **Home**: Food listing with categories and search
+- **Cart**: Shopping cart management
+- **Profile**: User profile and settings
+- **Orders**: Order history and tracking
 
-# OR using Yarn
-yarn start
+## 🛠 Tech Stack
+
+- **React Native**: 0.80.1
+- **TypeScript**: Full type safety
+- **React Query**: API state management and caching
+- **Context API**: Global state management
+- **React Navigation**: Navigation between screens
+- **AsyncStorage**: Local data persistence
+- **Vector Icons**: Beautiful iconography
+
+## 📦 Dependencies
+
+### Core Dependencies
+```json
+{
+  "@tanstack/react-query": "^5.0.0",
+  "@react-native-async-storage/async-storage": "^2.2.0",
+  "@react-navigation/native": "^7.1.14",
+  "@react-navigation/stack": "^7.4.2",
+  "@react-navigation/bottom-tabs": "^7.4.2",
+  "react-native-splash-screen": "^3.3.0"
+}
 ```
 
-## Step 2: Build and run your app
+## 🏗 Project Structure
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```
+src/
+├── context/
+│   ├── AuthContext.tsx          # Authentication state management
+│   └── OnboardingContext.tsx    # Onboarding state management
+├── services/
+│   ├── api.ts                   # React Query API hooks
+│   ├── apiCaller.ts             # Axios API client
+│   └── queryClient.ts           # React Query configuration
+├── screens/
+│   ├── auth/
+│   │   ├── LoginScreen.tsx      # Login screen
+│   │   ├── RegisterScreen.tsx   # Registration screen
+│   │   └── OtpScreen.tsx        # OTP verification
+│   ├── onboarding/
+│   │   └── OnboardingScreen.tsx # First-time user onboarding
+│   ├── splash/
+│   │   └── SplashScreen.tsx     # App splash screen
+│   └── foods/
+│       └── FoodScreen.tsx       # Food listing with React Query
+├── navigation/
+│   ├── MainNavigator.tsx        # Main navigation logic
+│   ├── AuthNavigator.tsx        # Authentication navigation
+│   └── BottomTabNavigator.tsx   # Bottom tab navigation
+└── types/
+    └── navigationTypes.ts       # Navigation type definitions
+```
+
+## 🔧 Setup Instructions
+
+### Prerequisites
+- Node.js >= 18
+- React Native CLI
+- Android Studio / Xcode
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd AwesomeProject
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Install iOS dependencies (iOS only)**
+   ```bash
+   cd ios && pod install && cd ..
+   ```
+
+4. **Run the app**
+   ```bash
+   # Android
+   npm run android
+   
+   # iOS
+   npm run ios
+   ```
+
+## 🔄 Migration from Redux
+
+This project has been migrated from Redux to Context API for better performance and simpler state management:
+
+### Changes Made:
+- ✅ Replaced Redux store with Context API
+- ✅ Migrated authentication logic to AuthContext
+- ✅ Implemented React Query for API calls
+- ✅ Added onboarding flow with OnboardingContext
+- ✅ Updated all screens to use new state management
+- ✅ Removed Redux dependencies
+
+### Benefits:
+- **Simpler State Management**: No need for actions, reducers, and middleware
+- **Better Performance**: Context API is more efficient for smaller state trees
+- **Easier Testing**: Simpler to test components with Context
+- **Modern Approach**: Using React's built-in features
+
+## 🎨 Theming
+
+The app uses a consistent color scheme:
+- **Primary**: #FF6B35 (Orange)
+- **Background**: #f8f9fa (Light Gray)
+- **Text**: #333333 (Dark Gray)
+- **Secondary Text**: #666666 (Medium Gray)
+
+## 📱 App Flow
+
+1. **First Launch**: Splash → Onboarding → Auth
+2. **Subsequent Launches**: Splash → Auth (if not logged in) or Main App
+3. **Authentication**: Login/Register → OTP Verification → Main App
+
+## 🔐 Authentication Flow
+
+1. **Registration**: Email + Password → OTP Verification → Login
+2. **Login**: Email + Password → Main App
+3. **OTP Verification**: 6-digit code sent to email
+4. **Session Management**: Automatic token refresh and persistence
+
+## 🚀 API Integration
+
+The app uses React Query for efficient API calls:
+- **Automatic Caching**: Reduces unnecessary API calls
+- **Background Updates**: Keeps data fresh
+- **Error Handling**: Built-in error states and retry logic
+- **Optimistic Updates**: Immediate UI feedback
+
+## 📝 Environment Setup
+
+Create a `.env` file for API configuration:
+```env
+API_BASE_URL=https://your-api-url.com/api
+```
+
+## 🧪 Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+## 📦 Build
 
 ### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```bash
+cd android
+./gradlew assembleRelease
 ```
 
 ### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+cd ios
+xcodebuild -workspace AwesomeProject.xcworkspace -scheme AwesomeProject -configuration Release
 ```
 
-Then, and every time you update your native dependencies, run:
+## 🤝 Contributing
 
-```sh
-bundle exec pod install
-```
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## 📄 License
 
-```sh
-# Using npm
-npm run ios
+This project is licensed under the MIT License.
 
-# OR using Yarn
-yarn ios
-```
+## 🆘 Support
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+For support and questions, please open an issue in the repository.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**Note**: This project has been completely refactored to use modern React Native patterns with Context API and React Query for better performance and maintainability.

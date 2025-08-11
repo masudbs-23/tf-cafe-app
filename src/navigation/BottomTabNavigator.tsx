@@ -5,8 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/Home';
 import CartScreen from '../screens/cart/CartScreen';
 import ProfileScreen from '../screens/user/ProfileScreen';
-import { RootState } from '../redux/store';
-import { useSelector } from 'react-redux';
+import { useCart } from '../context/CartContext';
 
 export type BottomTabParamList = {
   Home: undefined;
@@ -17,11 +16,13 @@ export type BottomTabParamList = {
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
-  const { totalQuantity } = useSelector((state: RootState) => state.carts);
+  const { state: cartState } = useCart();
+  const totalQuantity = cartState.totalQuantity;
+
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#00b894',
+        tabBarActiveTintColor: '#22C55E',
         tabBarInactiveTintColor: '#333',
         tabBarStyle: {
           backgroundColor: 'white',
@@ -38,8 +39,8 @@ const BottomTabNavigator = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: () => (
-            <Feather name="home" size={24} color="black" />
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="home" size={size} color={color} />
           ),
         }}
       />
@@ -47,8 +48,8 @@ const BottomTabNavigator = () => {
         name="Cart"
         component={CartScreen}
         options={{
-          tabBarIcon: () => (
-            <Feather name="shopping-cart" size={24} color="black" />
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="shopping-cart" size={size} color={color} />
           ),
           tabBarBadge: totalQuantity > 0 ? totalQuantity : undefined,
         }}
@@ -57,12 +58,11 @@ const BottomTabNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarIcon: () => (
-            <Ionicons name="person" size={24} color="black" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />
-
     </Tab.Navigator>
   );
 };

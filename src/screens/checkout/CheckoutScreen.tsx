@@ -1,7 +1,4 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { clearCart } from '../../redux/reducers/carts/cartsSlice';
-import { RootState } from '../../redux/store';
 import {
   View,
   Text,
@@ -9,16 +6,22 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Alert,
   Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import { useCart } from '../../context/CartContext';
+import { useCreateOrder } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 
 const CheckoutScreen = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const { items, totalPrice } = useSelector((state: RootState) => state.carts);
+  const { state: cartState, clearCart } = useCart();
+  const createOrderMutation = useCreateOrder();
+  const { showToast } = useToast();
+
+  const items = cartState.items;
+  const totalPrice = cartState.totalAmount;
 
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [deliveryDetails, setDeliveryDetails] = useState({
@@ -30,21 +33,27 @@ const CheckoutScreen = () => {
 
   const handleCheckout = () => {
     if (!deliveryDetails.name || !deliveryDetails.phone || !deliveryDetails.address) {
-      Alert.alert('Missing Information', 'Please fill in all required delivery details');
+      showToast('Please fill in all required delivery details', 'error');
       return;
     }
 
-    // Here you would typically send the order to your backend
-    console.log('Order placed:', {
+    const orderData = {
       items,
       totalPrice,
       paymentMethod,
       deliveryDetails
-    });
+    };
 
-    // Clear cart and navigate to order confirmation
-    dispatch(clearCart());
-    // navigation.navigate('OrderConfirmation');
+    createOrderMutation.mutate(orderData, {
+      onSuccess: () => {
+        showToast('Order placed successfully! You will receive a confirmation shortly.', 'success');
+        clearCart();
+        navigation.navigate('Main');
+      },
+      onError: (error) => {
+        showToast('Failed to place order. Please try again.', 'error');
+      }
+    });
   };
 
   return (
@@ -198,9 +207,12 @@ const CheckoutScreen = () => {
       <TouchableOpacity
         style={styles.checkoutButton}
         onPress={handleCheckout}
+        disabled={createOrderMutation.isPending}
       >
-        <Text style={styles.checkoutText}>Place Order</Text>
-        <Icon name="arrow-right" size={16} color="#ffffff" />
+        <Text style={styles.checkoutText}>
+          {createOrderMutation.isPending ? 'Placing Order...' : 'Place Order'}
+        </Text>
+        {!createOrderMutation.isPending && <Icon name="arrow-right" size={16} color="#ffffff" />}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -210,7 +222,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-
   },
   scrollContainer: {
     paddingBottom: 30,
@@ -241,11 +252,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 10,
     padding: 16,
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 1 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 3,
-    // elevation: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -325,37 +331,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1e293b',
   },
-  bkashDetails: {
-    padding: 12,
-    backgroundColor: '#f8fafc',
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  bkashNote: {
-    fontSize: 14,
-    color: '#64748b',
-    marginBottom: 8,
-  },
-  bkashNumberContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  bkashNumber: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  copyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  copyText: {
-    marginLeft: 4,
-    color: '#3b82f6',
-    fontSize: 14,
-  },
   orderItems: {
     marginBottom: 12,
   },
@@ -408,7 +383,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
     padding: 16,
     borderRadius: 8,
     marginHorizontal: 16,

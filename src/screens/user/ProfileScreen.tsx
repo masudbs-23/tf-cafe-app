@@ -10,13 +10,11 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { AppDispatch, RootState } from '../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../redux/reducers/auth/authSlice';
+import { useAuth } from '../../context/AuthContext';
 
 const ProfileScreen = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, } = useSelector((state: RootState) => state.user);
+  const { logout } = useAuth();
+  
   const staticUserData = {
     name: 'Masud Rana',
     email: 'masud@gmail.com',
@@ -27,6 +25,7 @@ const ProfileScreen = () => {
     paymentMethods: 2,
     recentOrders: 12,
   };
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -38,11 +37,12 @@ const ProfileScreen = () => {
         },
         {
           text: 'Logout',
-          onPress: () => dispatch(logout())
+          onPress: () => logout()
         },
       ]
     );
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -60,55 +60,49 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
-
-
         {/* Profile Options Section */}
         <View style={styles.menuSection}>
           {/* Order History */}
           <View style={styles.profileItem}>
             <View style={styles.itemLeft}>
-              <Icon name="history" size={24} color="#FF6B6B" />
+              <Icon name="history" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Order History</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.recentOrders} orders</Text>
-
             </View>
           </View>
 
           {/* Payment Methods */}
           <View style={styles.profileItem}>
             <View style={styles.itemLeft}>
-              <Icon name="credit-card" size={24} color="#FF6B6B" />
+              <Icon name="credit-card" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Payment Methods</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.paymentMethods} cards</Text>
-
             </View>
           </View>
 
           {/* Delivery Address */}
           <View style={styles.profileItem}>
             <View style={styles.itemLeft}>
-              <Icon name="location-on" size={24} color="#FF6B6B" />
+              <Icon name="location-on" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Delivery Address</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue} numberOfLines={1} ellipsizeMode="tail">
                 {staticUserData.address}
               </Text>
-
             </View>
           </View>
 
           {/* Settings */}
           <View style={[styles.profileItem, { borderBottomWidth: 0 }]}>
             <View style={styles.itemLeft}>
-              <Icon name="settings" size={24} color="#FF6B6B" />
+              <Icon name="settings" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Settings</Text>
             </View>
-
           </View>
         </View>
 
@@ -177,7 +171,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 24,
-
   },
   loyaltyHeader: {
     flexDirection: 'row',

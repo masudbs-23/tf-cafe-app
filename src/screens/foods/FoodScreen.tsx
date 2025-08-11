@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, StyleSheet, Dimensions, TextInput } from 'react-native';
-import { useGetFoodsQuery } from '../../redux/reducers/foods/foodApi';
-import { setFilters } from '../../redux/reducers/foods/foodSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { addToCartAndPersist } from '../../redux/reducers/carts/cartsSlice';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  Image, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  StyleSheet, 
+  Dimensions, 
+  TextInput
+} from 'react-native';
+import { useFoods } from '../../services/api';
+import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width } = Dimensions.get('window');
@@ -12,39 +20,31 @@ const CARD_MARGIN = 8;
 const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2;
 
 const FoodScreen = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const filters = useSelector((state: RootState) => state.foods.filters);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  // RTK Query to fetch foods
-  const { data: foods = [], isLoading, isError, error } = useGetFoodsQuery(filters);
+  // React Query hooks
+  const { data: foodsData, isLoading, isError, error } = useFoods();
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
+
+  // Handle different response structures
+  const foods = Array.isArray(foodsData) ? foodsData : (foodsData?.data || foodsData || []);
 
   const categories = ['All', ...new Set(foods.map(food => food.category))];
 
   const handleCategoryChange = (category: string) => {
-    dispatch(setFilters({
-      ...filters,
-      category: category === 'All' ? '' : category
-    }));
+    setSelectedCategory(category);
   };
 
   const handleSearch = () => {
-    dispatch(setFilters({
-      ...filters,
-      search: searchQuery
-    }));
+    // Implement search functionality
+    console.log('Searching for:', searchQuery);
   };
 
   const resetFilters = () => {
-    const defaultFilters = {
-      category: "",
-      minPrice: 0,
-      maxPrice: 1000,
-      sortBy: "",
-      search: ""
-    };
-    dispatch(setFilters(defaultFilters));
+    setSelectedCategory('All');
     setSearchQuery('');
   };
 
@@ -55,14 +55,36 @@ const FoodScreen = () => {
   };
 
   const handleAddToCart = (foodItem: any) => {
-    dispatch(addToCartAndPersist(foodItem));
+    console.log('Adding food item to cart:', foodItem);
+    
+    if (!foodItem._id) {
+      showToast('Invalid food item', 'error');
+      return;
+    }
+
+    try {
+      addToCart({
+        _id: foodItem._id,
+        name: foodItem.name,
+        price: foodItem.price,
+        image: foodItem.image,
+      });
+      showToast(`${foodItem.name} added to cart!`, 'success');
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      showToast('Failed to add item to cart', 'error');
+    }
   };
 
+  // Filter foods based on selected category
+  const filteredFoods = foods.filter(food => 
+    selectedCategory === 'All' || food.category === selectedCategory
+  );
 
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#000" />
+        <ActivityIndicator size="large" color="#FF6B35" />
       </View>
     );
   }
@@ -70,7 +92,10 @@ const FoodScreen = () => {
   if (isError) {
     return (
       <View style={styles.center}>
-        <Text>Error: {(error as any)?.data?.message || 'Failed to fetch foods'}</Text>
+        <Text style={styles.errorText}>Error: {(error as any)?.message || 'Failed to fetch foods'}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => window.location.reload()}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -78,7 +103,7 @@ const FoodScreen = () => {
   return (
     <View style={styles.container}>
       {/* Search Input */}
-      {/* <View style={styles.searchContainer}>
+      <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search foods..."
@@ -90,7 +115,7 @@ const FoodScreen = () => {
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
-      </View> */}
+      </View>
 
       {/* Categories Filter */}
       <View style={styles.filterSection}>
@@ -106,14 +131,12 @@ const FoodScreen = () => {
               onPress={() => handleCategoryChange(item)}
               style={[
                 styles.categoryButton,
-                (filters.category === item || (item === 'All' && !filters.category)) &&
-                styles.selectedCategory
+                selectedCategory === item && styles.selectedCategory
               ]}
             >
               <Text style={[
                 styles.categoryText,
-                (filters.category === item || (item === 'All' && !filters.category)) &&
-                styles.selectedCategoryText
+                selectedCategory === item && styles.selectedCategoryText
               ]}>
                 {item}
               </Text>
@@ -124,13 +147,13 @@ const FoodScreen = () => {
 
       {/* Food Grid */}
       <FlatList
-        data={foods}
+        data={filteredFoods}
         numColumns={2}
         keyExtractor={(item) => item._id}
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={
           <Text style={styles.itemCount}>
-            {foods.length} {foods.length === 1 ? 'Item' : 'Items'} Found
+            {filteredFoods.length} {filteredFoods.length === 1 ? 'Item' : 'Items'} Found
           </Text>
         }
         ListEmptyComponent={
@@ -148,11 +171,11 @@ const FoodScreen = () => {
               {item.image && (
                 <Image source={{ uri: item.image }} style={styles.foodImage} />
               )}
-              <TouchableOpacity
-                style={styles.cartButton}
-                onPress={() => handleAddToCart(item)}
-                disabled={!item.available}
-              >
+                             <TouchableOpacity
+                 style={styles.cartButton}
+                 onPress={() => handleAddToCart(item)}
+                 disabled={!item.available}
+               >
                 <Icon
                   name="shopping-cart"
                   size={20}
@@ -174,9 +197,10 @@ const FoodScreen = () => {
           </View>
         )}
       />
-    </View >
+    </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -192,7 +216,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // backgroundColor: '#fff',
   },
   searchInput: {
     flex: 1,
@@ -206,7 +229,7 @@ const styles = StyleSheet.create({
     padding: 5
   },
   searchButton: {
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
     borderRadius: 14,
     paddingHorizontal: 16,
     justifyContent: 'center',
@@ -218,20 +241,12 @@ const styles = StyleSheet.create({
   },
   filterSection: {
     paddingVertical: 12,
-    // backgroundColor: '#fff',
     marginBottom: 8,
     paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
   },
   categoriesContainer: {
     paddingRight: 16,
   },
-
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -240,7 +255,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2',
   },
   selectedCategory: {
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
   },
   categoryText: {
     fontSize: 14,
@@ -263,7 +278,6 @@ const styles = StyleSheet.create({
     height: CARD_WIDTH * 0.8,
     resizeMode: 'cover',
   },
-
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -276,7 +290,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   resetButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#22C55E',
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
@@ -296,21 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: CARD_MARGIN,
-
   },
-  favoriteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 20,
-    padding: 4,
-  },
-  favoriteIcon: {
-    fontSize: 20,
-  },
-
   foodDetails: {
     padding: 12,
   },
@@ -336,21 +336,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'red',
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
   cartButton: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
     borderRadius: 20,
     padding: 6,
     zIndex: 1,
   },
-  cartButtonText: {
+  errorText: {
+    fontSize: 16,
+    color: '#ef4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#22C55E',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
   },
 });
