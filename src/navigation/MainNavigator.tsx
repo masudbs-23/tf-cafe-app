@@ -31,10 +31,7 @@ const MainNavigator: React.FC = () => {
     return <CustomSplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
-  // Show loading while auth state is loading
-  if (authState.isLoading) {
-    return <CustomSplashScreen onFinish={() => {}} />;
-  }
+  // Don't show splash screen during API loading - let individual screens handle their own loading states
 
   return (
     <NavigationContainer>

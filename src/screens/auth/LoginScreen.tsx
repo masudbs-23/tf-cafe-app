@@ -51,7 +51,6 @@ const LoginScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <Spinner
         visible={state.isLoading}
-        textContent={'Logging in...'}
         textStyle={styles.spinnerText}
         overlayColor="rgba(0, 0, 0, 0.7)"
         color="#22C55E"
@@ -102,11 +101,17 @@ const LoginScreen: React.FC = () => {
               </View>
 
               <TouchableOpacity
-                style={styles.loginButton}
+                style={[
+                  styles.loginButton,
+                  (!email || !password) && styles.loginButtonInactive
+                ]}
                 onPress={handleLogin}
-                disabled={state.isLoading}
+                disabled={state.isLoading || !email || !password}
               >
-                <Text style={styles.loginButtonText}>Login</Text>
+                <Text style={[
+                  styles.loginButtonText,
+                  (!email || !password) && styles.loginButtonTextInactive
+                ]}>Login</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton} disabled={state.isLoading}>
@@ -224,6 +229,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginRight: 10,
+  },
+  loginButtonInactive: {
+    backgroundColor: '#9CA3AF',
+    shadowColor: '#9CA3AF',
+    shadowOpacity: 0.3,
+  },
+  loginButtonTextInactive: {
+    color: '#E5E7EB',
   },
   socialButton: {
     flexDirection: 'row',

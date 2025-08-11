@@ -124,9 +124,10 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     top: 50,
-    left: 16,
-    right: 16,
+    right: 0,
+    width: width * 0.8, // 80% of screen width
     zIndex: 9999,
+    marginRight: 0, // No margin on right side
   },
   toast: {
     flexDirection: 'row',

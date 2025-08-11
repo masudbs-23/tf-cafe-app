@@ -109,11 +109,17 @@ const RegisterScreen: React.FC = () => {
                 />
               </View>
               <TouchableOpacity
-                style={styles.registerButton}
+                style={[
+                  styles.registerButton,
+                  (!email || !password || !name) && styles.registerButtonInactive
+                ]}
                 onPress={handleRegister}
-                disabled={state.isLoading}
+                disabled={state.isLoading || !email || !password || !name}
               >
-                <Text style={styles.registerButtonText}>Create Account</Text>
+                <Text style={[
+                  styles.registerButtonText,
+                  (!email || !password || !name) && styles.registerButtonTextInactive
+                ]}>Create Account</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.socialButton} disabled={state.isLoading}>
                 <Text style={styles.socialButtonText}>Continue with Facebook</Text>
@@ -224,6 +230,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginRight: 10,
+  },
+  registerButtonInactive: {
+    backgroundColor: '#9CA3AF',
+    shadowColor: '#9CA3AF',
+    shadowOpacity: 0.3,
+  },
+  registerButtonTextInactive: {
+    color: '#E5E7EB',
   },
   socialButton: {
     flexDirection: 'row',
