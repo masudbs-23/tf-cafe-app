@@ -12,11 +12,16 @@ import {
   SafeAreaView,
   ImageSourcePropType,
 } from 'react-native';
-// import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types/navigationTypes';
 
 const { width } = Dimensions.get('window');
 
 const Header = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  
   // Dummy data with proper typing
   const userData = {
     location: 'Dhaka, Bangladesh',
@@ -25,25 +30,43 @@ const Header = () => {
     promo: {
       text: 'Get 50% off on your first order!',
       cta: 'ORDER NOW'
-    }
+    },
+    notificationCount: 3, // Dummy notification count
   };
 
   return (
     <SafeAreaView style={styles.safeArea} >
       <View style={styles.container}>
         {/* Top Row */}
-        < View style={styles.topRow} >
-          <TouchableOpacity style={styles.locationContainer} activeOpacity={0.8} >
-            {/* <Ionicons name="location-sharp" size={22} color="#FF6B6B" /> */}
-            <Text style={styles.locationText} numberOfLines={1} >
+        <View style={styles.topRow}>
+          <TouchableOpacity style={styles.locationContainer} activeOpacity={0.8}>
+            <Icon name="location-on" size={20} color="#FF6B6B" />
+            <Text style={styles.locationText} numberOfLines={1}>
               {userData.location}
             </Text>
-            {/* < MaterialIcons name="keyboard-arrow-down" size={22} color="#FF6B6B" /> */}
+            <Icon name="keyboard-arrow-down" size={20} color="#FF6B6B" />
           </TouchableOpacity>
 
-          < TouchableOpacity style={styles.profileContainer} activeOpacity={0.8} >
-            <Image source={userData.avatar} style={styles.profileImage} />
-          </TouchableOpacity>
+          <View style={styles.rightContainer}>
+            <TouchableOpacity 
+              style={styles.notificationContainer} 
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('Notifications')}
+            >
+              <Icon name="notifications" size={24} color="#333" />
+              {userData.notificationCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {userData.notificationCount > 9 ? '9+' : userData.notificationCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.profileContainer} activeOpacity={0.8}>
+              <Image source={userData.avatar} style={styles.profileImage} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Promo Banner */}
@@ -87,6 +110,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+  },
+  rightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  notificationContainer: {
+    position: 'relative',
+    padding: 4,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  notificationBadgeText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   profileContainer: {
     width: 40,

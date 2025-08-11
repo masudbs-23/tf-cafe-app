@@ -11,4 +11,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Orders: undefined;
   Offers: undefined;
+  OrderHistory: undefined;
+  Settings: undefined;
+  Notifications: undefined;
 };

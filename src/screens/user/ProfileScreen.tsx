@@ -11,9 +11,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/navigationTypes';
 
 const ProfileScreen = () => {
   const { logout } = useAuth();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   
   const staticUserData = {
     name: 'Masud Rana',
@@ -63,15 +67,20 @@ const ProfileScreen = () => {
         {/* Profile Options Section */}
         <View style={styles.menuSection}>
           {/* Order History */}
-          <View style={styles.profileItem}>
+          <TouchableOpacity 
+            style={styles.profileItem}
+            onPress={() => navigation.navigate('OrderHistory')}
+            activeOpacity={0.7}
+          >
             <View style={styles.itemLeft}>
               <Icon name="history" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Order History</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.recentOrders} orders</Text>
+              <Icon name="chevron-right" size={24} color="#666" />
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Payment Methods */}
           <View style={styles.profileItem}>
@@ -98,12 +107,19 @@ const ProfileScreen = () => {
           </View>
 
           {/* Settings */}
-          <View style={[styles.profileItem, { borderBottomWidth: 0 }]}>
+          <TouchableOpacity 
+            style={[styles.profileItem, { borderBottomWidth: 0 }]}
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.7}
+          >
             <View style={styles.itemLeft}>
               <Icon name="settings" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Settings</Text>
             </View>
-          </View>
+            <View style={styles.itemRight}>
+              <Icon name="chevron-right" size={24} color="#666" />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Logout Button */}

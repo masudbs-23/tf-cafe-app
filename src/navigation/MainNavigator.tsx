@@ -10,6 +10,9 @@ import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
 import AuthNavigator from './AuthNavigator';
 import BottomTabNavigator from './BottomTabNavigator';
 import CheckoutScreen from '../screens/checkout/CheckoutScreen';
+import OrderHistoryScreen from '../screens/user/OrderHistoryScreen';
+import SettingsScreen from '../screens/user/SettingsScreen';
+import NotificationsScreen from '../screens/user/NotificationsScreen';
 
 const Stack = createStackNavigator();
 
@@ -52,6 +55,9 @@ const MainNavigator: React.FC = () => {
           <>
             <Stack.Screen name="Main" component={BottomTabNavigator} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
+            <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
           </>
         ) : (
           // Non-authenticated user flow

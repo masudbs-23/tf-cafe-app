@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -8,7 +8,8 @@ import {
   ActivityIndicator, 
   StyleSheet, 
   Dimensions, 
-  TextInput
+  TextInput,
+  Animated
 } from 'react-native';
 import { useFoods } from '../../services/api';
 import { useCart } from '../../context/CartContext';
@@ -23,11 +24,34 @@ const FoodScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [skeletonAnimation] = useState(new Animated.Value(0));
 
   // React Query hooks
   const { data: foodsData, isLoading, isError, error } = useFoods();
   const { addToCart } = useCart();
   const { showToast } = useToast();
+
+  // Skeleton animation
+  useEffect(() => {
+    if (isLoading) {
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(skeletonAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: false,
+          }),
+          Animated.timing(skeletonAnimation, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: false,
+          }),
+        ])
+      );
+      animation.start();
+      return () => animation.stop();
+    }
+  }, [isLoading, skeletonAnimation]);
 
   // Handle different response structures
   const foods = Array.isArray(foodsData) ? foodsData : (foodsData?.data || foodsData || []);
@@ -81,10 +105,128 @@ const FoodScreen = () => {
     selectedCategory === 'All' || food.category === selectedCategory
   );
 
+  // Skeleton Components
+  const SkeletonView = ({ width, height, style }: { width: number | string, height: number | string, style?: any }) => {
+    const opacity = skeletonAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.3, 0.7],
+    });
+
+    return (
+      <Animated.View
+        style={[
+          {
+            width,
+            height,
+            borderRadius: 4,
+            opacity,
+          },
+          style,
+        ]}
+      />
+    );
+  };
+
+  const SearchSkeleton = () => (
+    <View style={styles.searchContainer}>
+      <SkeletonView 
+        width="70%" 
+        height={50} 
+        style={{ 
+          marginRight: 8,
+          borderWidth: 1,
+          borderColor: '#fff',
+          borderRadius: 14,
+          backgroundColor: '#fff',
+        }} 
+      />
+      <SkeletonView 
+        width="20%" 
+        height={50} 
+        style={{
+          backgroundColor: '#22C55E',
+          borderRadius: 14,
+        }}
+      />
+    </View>
+  );
+
+  const CategorySkeleton = () => (
+    <View style={styles.filterSection}>
+      <FlatList
+        horizontal
+        data={[1, 2, 3, 4, 5]}
+        keyExtractor={(item) => item.toString()}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesContainer}
+        renderItem={({ item }) => (
+          <SkeletonView
+            key={item}
+            width={80}
+            height={36}
+            style={{ 
+              marginRight: 8, 
+              borderRadius: 20,
+              backgroundColor: '#f2f2f2',
+            }}
+          />
+        )}
+      />
+    </View>
+  );
+
+  const FoodCardSkeleton = () => (
+    <View style={styles.foodCard}>
+      <SkeletonView 
+        width="100%" 
+        height={CARD_WIDTH * 0.8} 
+        style={{
+          backgroundColor: '#e5e7eb',
+        }}
+      />
+      <View style={styles.foodDetails}>
+        <View style={styles.namePriceContainer}>
+          <SkeletonView 
+            width="60%" 
+            height={16} 
+            style={{
+              backgroundColor: '#e5e7eb',
+            }}
+          />
+          <SkeletonView 
+            width="30%" 
+            height={16} 
+            style={{
+              backgroundColor: '#e5e7eb',
+            }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+
+  const FoodGridSkeleton = () => (
+    <View style={styles.columnWrapper}>
+      <FoodCardSkeleton />
+      <FoodCardSkeleton />
+    </View>
+  );
+
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#FF6B35" />
+      <View style={styles.container}>
+        <SearchSkeleton />
+        <CategorySkeleton />
+        <View style={styles.itemCount}>
+          <SkeletonView width={120} height={16} />
+        </View>
+        <FlatList
+          data={[1, 2, 3, 4]}
+          numColumns={2}
+          keyExtractor={(item) => item.toString()}
+          columnWrapperStyle={styles.columnWrapper}
+          renderItem={({ item }) => <FoodGridSkeleton key={item} />}
+        />
       </View>
     );
   }
