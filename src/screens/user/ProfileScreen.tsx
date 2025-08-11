@@ -10,13 +10,15 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { AppDispatch, RootState } from '../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../redux/reducers/auth/authSlice';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../types/navigationTypes';
 
 const ProfileScreen = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, } = useSelector((state: RootState) => state.user);
+  const { logout } = useAuth();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  
   const staticUserData = {
     name: 'Masud Rana',
     email: 'masud@gmail.com',
@@ -27,6 +29,7 @@ const ProfileScreen = () => {
     paymentMethods: 2,
     recentOrders: 12,
   };
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -38,11 +41,12 @@ const ProfileScreen = () => {
         },
         {
           text: 'Logout',
-          onPress: () => dispatch(logout())
+          onPress: () => logout()
         },
       ]
     );
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -60,68 +64,62 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Loyalty Points Card */}
-        <View style={styles.loyaltyCard}>
-          <View style={styles.loyaltyHeader}>
-            <Icon name="loyalty" size={24} color="#FFD700" />
-            <Text style={styles.loyaltyTitle}>Foodie Rewards</Text>
-          </View>
-          <Text style={styles.loyaltyPoints}>{staticUserData.loyaltyPoints} pts</Text>
-          <Text style={styles.loyaltySubtext}>
-            {1500 - staticUserData.loyaltyPoints} pts until your next free meal
-          </Text>
-        </View>
-
         {/* Profile Options Section */}
         <View style={styles.menuSection}>
           {/* Order History */}
-          <View style={styles.profileItem}>
+          <TouchableOpacity 
+            style={styles.profileItem}
+            onPress={() => navigation.navigate('OrderHistory')}
+            activeOpacity={0.7}
+          >
             <View style={styles.itemLeft}>
-              <Icon name="history" size={24} color="#FF6B6B" />
+              <Icon name="history" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Order History</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.recentOrders} orders</Text>
-              <Icon name="chevron-right" size={24} color="#999" />
+              <Icon name="chevron-right" size={24} color="#666" />
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Payment Methods */}
           <View style={styles.profileItem}>
             <View style={styles.itemLeft}>
-              <Icon name="credit-card" size={24} color="#FF6B6B" />
+              <Icon name="credit-card" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Payment Methods</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue}>{staticUserData.paymentMethods} cards</Text>
-              <Icon name="chevron-right" size={24} color="#999" />
             </View>
           </View>
 
           {/* Delivery Address */}
           <View style={styles.profileItem}>
             <View style={styles.itemLeft}>
-              <Icon name="location-on" size={24} color="#FF6B6B" />
+              <Icon name="location-on" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Delivery Address</Text>
             </View>
             <View style={styles.itemRight}>
               <Text style={styles.itemValue} numberOfLines={1} ellipsizeMode="tail">
                 {staticUserData.address}
               </Text>
-              <Icon name="chevron-right" size={24} color="#999" />
             </View>
           </View>
 
           {/* Settings */}
-          <View style={[styles.profileItem, { borderBottomWidth: 0 }]}>
+          <TouchableOpacity 
+            style={[styles.profileItem, { borderBottomWidth: 0 }]}
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.7}
+          >
             <View style={styles.itemLeft}>
-              <Icon name="settings" size={24} color="#FF6B6B" />
+              <Icon name="settings" size={24} color="#22C55E" />
               <Text style={styles.itemTitle}>Settings</Text>
             </View>
             <View style={styles.itemRight}>
-              <Icon name="chevron-right" size={24} color="#999" />
+              <Icon name="chevron-right" size={24} color="#666" />
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Logout Button */}
@@ -136,7 +134,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#f9fafb',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -145,7 +143,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 24,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     marginBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',
@@ -184,12 +182,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   loyaltyCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 24,
-
   },
   loyaltyHeader: {
     flexDirection: 'row',
@@ -213,7 +210,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   menuSection: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderRadius: 12,
     marginHorizontal: 16,
     marginBottom: 24,
@@ -249,14 +246,14 @@ const styles = StyleSheet.create({
   logoutButton: {
     marginHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#FFF',
+    backgroundColor: '#FF6B6B',
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#FF6B6B',
   },
   logoutButtonText: {
-    color: '#FF6B6B',
+    color: '#fff',
     fontWeight: '600',
     fontSize: 16,
   },

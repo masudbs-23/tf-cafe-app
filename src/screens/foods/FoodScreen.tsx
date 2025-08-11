@@ -1,48 +1,74 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, StyleSheet, Dimensions, TextInput } from 'react-native';
-import { useGetFoodsQuery } from '../../redux/reducers/foods/foodApi';
-import { setFilters } from '../../redux/reducers/foods/foodSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  Image, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  StyleSheet, 
+  Dimensions, 
+  TextInput,
+  Animated
+} from 'react-native';
+import { useFoods } from '../../services/api';
+import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 8;
 const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2;
 
 const FoodScreen = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const filters = useSelector((state: RootState) => state.foods.filters);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [skeletonAnimation] = useState(new Animated.Value(0));
 
-  // RTK Query to fetch foods
-  const { data: foods = [], isLoading, isError, error } = useGetFoodsQuery(filters);
+  // React Query hooks
+  const { data: foodsData, isLoading, isError, error } = useFoods();
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
+
+  // Skeleton animation
+  useEffect(() => {
+    if (isLoading) {
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(skeletonAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: false,
+          }),
+          Animated.timing(skeletonAnimation, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: false,
+          }),
+        ])
+      );
+      animation.start();
+      return () => animation.stop();
+    }
+  }, [isLoading, skeletonAnimation]);
+
+  // Handle different response structures
+  const foods = Array.isArray(foodsData) ? foodsData : (foodsData?.data || foodsData || []);
 
   const categories = ['All', ...new Set(foods.map(food => food.category))];
 
   const handleCategoryChange = (category: string) => {
-    dispatch(setFilters({
-      ...filters,
-      category: category === 'All' ? '' : category
-    }));
+    setSelectedCategory(category);
   };
 
   const handleSearch = () => {
-    dispatch(setFilters({
-      ...filters,
-      search: searchQuery
-    }));
+    // Implement search functionality
+    console.log('Searching for:', searchQuery);
   };
 
   const resetFilters = () => {
-    const defaultFilters = {
-      category: "",
-      minPrice: 0,
-      maxPrice: 1000,
-      sortBy: "",
-      search: ""
-    };
-    dispatch(setFilters(defaultFilters));
+    setSelectedCategory('All');
     setSearchQuery('');
   };
 
@@ -52,10 +78,155 @@ const FoodScreen = () => {
     );
   };
 
+  const handleAddToCart = (foodItem: any) => {
+    console.log('Adding food item to cart:', foodItem);
+    
+    if (!foodItem._id) {
+      showToast('Invalid food item', 'error');
+      return;
+    }
+
+    try {
+      addToCart({
+        _id: foodItem._id,
+        name: foodItem.name,
+        price: foodItem.price,
+        image: foodItem.image,
+      });
+      showToast('Food Added', 'success');
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      showToast('Failed to add item to cart', 'error');
+    }
+  };
+
+  // Filter foods based on selected category
+  const filteredFoods = foods.filter(food => 
+    selectedCategory === 'All' || food.category === selectedCategory
+  );
+
+  // Skeleton Components
+  const SkeletonView = ({ width, height, style }: { width: number | string, height: number | string, style?: any }) => {
+    const opacity = skeletonAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.3, 0.7],
+    });
+
+    return (
+      <Animated.View
+        style={[
+          {
+            width,
+            height,
+            borderRadius: 4,
+            opacity,
+          },
+          style,
+        ]}
+      />
+    );
+  };
+
+  const SearchSkeleton = () => (
+    <View style={styles.searchContainer}>
+      <SkeletonView 
+        width="70%" 
+        height={50} 
+        style={{ 
+          marginRight: 8,
+          borderWidth: 1,
+          borderColor: '#fff',
+          borderRadius: 14,
+          backgroundColor: '#fff',
+        }} 
+      />
+      <SkeletonView 
+        width="20%" 
+        height={50} 
+        style={{
+          backgroundColor: '#22C55E',
+          borderRadius: 14,
+        }}
+      />
+    </View>
+  );
+
+  const CategorySkeleton = () => (
+    <View style={styles.filterSection}>
+      <FlatList
+        horizontal
+        data={[1, 2, 3, 4, 5]}
+        keyExtractor={(item) => item.toString()}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesContainer}
+        renderItem={({ item }) => (
+          <SkeletonView
+            key={item}
+            width={80}
+            height={36}
+            style={{ 
+              marginRight: 8, 
+              borderRadius: 20,
+              backgroundColor: '#f2f2f2',
+            }}
+          />
+        )}
+      />
+    </View>
+  );
+
+  const FoodCardSkeleton = () => (
+    <View style={styles.foodCard}>
+      <SkeletonView 
+        width="100%" 
+        height={CARD_WIDTH * 0.8} 
+        style={{
+          backgroundColor: '#e5e7eb',
+        }}
+      />
+      <View style={styles.foodDetails}>
+        <View style={styles.namePriceContainer}>
+          <SkeletonView 
+            width="60%" 
+            height={16} 
+            style={{
+              backgroundColor: '#e5e7eb',
+            }}
+          />
+          <SkeletonView 
+            width="30%" 
+            height={16} 
+            style={{
+              backgroundColor: '#e5e7eb',
+            }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+
+  const FoodGridSkeleton = () => (
+    <View style={styles.columnWrapper}>
+      <FoodCardSkeleton />
+      <FoodCardSkeleton />
+    </View>
+  );
+
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#000" />
+      <View style={styles.container}>
+        <SearchSkeleton />
+        <CategorySkeleton />
+        <View style={styles.itemCount}>
+          <SkeletonView width={120} height={16} />
+        </View>
+        <FlatList
+          data={[1, 2, 3, 4]}
+          numColumns={2}
+          keyExtractor={(item) => item.toString()}
+          columnWrapperStyle={styles.columnWrapper}
+          renderItem={({ item }) => <FoodGridSkeleton key={item} />}
+        />
       </View>
     );
   }
@@ -63,7 +234,10 @@ const FoodScreen = () => {
   if (isError) {
     return (
       <View style={styles.center}>
-        <Text>Error: {(error as any)?.data?.message || 'Failed to fetch foods'}</Text>
+        <Text style={styles.errorText}>Error: {(error as any)?.message || 'Failed to fetch foods'}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => window.location.reload()}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -99,14 +273,12 @@ const FoodScreen = () => {
               onPress={() => handleCategoryChange(item)}
               style={[
                 styles.categoryButton,
-                (filters.category === item || (item === 'All' && !filters.category)) &&
-                styles.selectedCategory
+                selectedCategory === item && styles.selectedCategory
               ]}
             >
               <Text style={[
                 styles.categoryText,
-                (filters.category === item || (item === 'All' && !filters.category)) &&
-                styles.selectedCategoryText
+                selectedCategory === item && styles.selectedCategoryText
               ]}>
                 {item}
               </Text>
@@ -117,13 +289,13 @@ const FoodScreen = () => {
 
       {/* Food Grid */}
       <FlatList
-        data={foods}
+        data={filteredFoods}
         numColumns={2}
         keyExtractor={(item) => item._id}
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={
           <Text style={styles.itemCount}>
-            {foods.length} {foods.length === 1 ? 'Item' : 'Items'} Found
+            {filteredFoods.length} {filteredFoods.length === 1 ? 'Item' : 'Items'} Found
           </Text>
         }
         ListEmptyComponent={
@@ -136,9 +308,23 @@ const FoodScreen = () => {
         }
         renderItem={({ item }) => (
           <View style={styles.foodCard}>
-            {item.image && (
-              <Image source={{ uri: item.image }} style={styles.foodImage} />
-            )}
+            {/* Image Container with Cart Button */}
+            <View style={styles.imageContainer}>
+              {item.image && (
+                <Image source={{ uri: item.image }} style={styles.foodImage} />
+              )}
+                             <TouchableOpacity
+                 style={styles.cartButton}
+                 onPress={() => handleAddToCart(item)}
+                 disabled={!item.available}
+               >
+                <Icon
+                  name="shopping-cart"
+                  size={20}
+                  color="#fff"
+                />
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.foodDetails}>
               <View style={styles.namePriceContainer}>
@@ -160,7 +346,7 @@ const FoodScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f9fafb',
     paddingHorizontal: 8,
   },
   center: {
@@ -172,29 +358,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
   },
   searchInput: {
     flex: 1,
-    height: 40,
+    height: 50,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#fff',
     borderRadius: 14,
     paddingHorizontal: 16,
     marginRight: 8,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
     padding: 5
   },
   searchButton: {
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
     borderRadius: 14,
     paddingHorizontal: 16,
     justifyContent: 'center',
@@ -206,15 +383,8 @@ const styles = StyleSheet.create({
   },
   filterSection: {
     paddingVertical: 12,
-    backgroundColor: '#fff',
     marginBottom: 8,
     paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
   },
   categoriesContainer: {
     paddingRight: 16,
@@ -227,7 +397,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2',
   },
   selectedCategory: {
-    backgroundColor: '#00b894',
+    backgroundColor: '#22C55E',
   },
   categoryText: {
     fontSize: 14,
@@ -242,6 +412,14 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     paddingLeft: 8,
   },
+  imageContainer: {
+    position: 'relative',
+  },
+  foodImage: {
+    width: '100%',
+    height: CARD_WIDTH * 0.8,
+    resizeMode: 'cover',
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -254,7 +432,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   resetButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#22C55E',
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
@@ -274,28 +452,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: CARD_MARGIN,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 20,
-    padding: 4,
-  },
-  favoriteIcon: {
-    fontSize: 20,
-  },
-  foodImage: {
-    width: '100%',
-    height: CARD_WIDTH * 0.8,
-    resizeMode: 'cover',
   },
   foodDetails: {
     padding: 12,
@@ -323,17 +479,29 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   cartButton: {
-    backgroundColor: '#000',
-    paddingVertical: 8,
-    borderRadius: 6,
-    alignItems: 'center',
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#22C55E',
+    borderRadius: 20,
+    padding: 6,
+    zIndex: 1,
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
+  errorText: {
+    fontSize: 16,
+    color: '#ef4444',
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  cartButtonText: {
+  retryButton: {
+    backgroundColor: '#22C55E',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
   },
 });
