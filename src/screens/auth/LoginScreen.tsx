@@ -9,8 +9,8 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
 } from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigationTypes';
@@ -42,12 +42,21 @@ const LoginScreen: React.FC = () => {
 
   useEffect(() => {
     if (state.isAuthenticated) {
-      navigation.replace('Main');
+      // The MainNavigator will automatically handle the redirect
+      // No need to manually navigate here
     }
   }, [state.isAuthenticated, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
+      <Spinner
+        visible={state.isLoading}
+        textContent={'Logging in...'}
+        textStyle={styles.spinnerText}
+        overlayColor="rgba(0, 0, 0, 0.7)"
+        color="#22C55E"
+        size="large"
+      />
       <ImageBackground
         source={{ uri: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' }}
         style={styles.backgroundImage}
@@ -97,11 +106,7 @@ const LoginScreen: React.FC = () => {
                 onPress={handleLogin}
                 disabled={state.isLoading}
               >
-                {state.isLoading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.loginButtonText}>Login</Text>
-                )}
+                <Text style={styles.loginButtonText}>Login</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton} disabled={state.isLoading}>
@@ -254,6 +259,11 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     color: '#22C55E',
+    fontWeight: '600',
+  },
+  spinnerText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

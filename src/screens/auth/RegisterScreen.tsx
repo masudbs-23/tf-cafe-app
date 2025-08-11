@@ -8,9 +8,9 @@ import {
   SafeAreaView, 
   ImageBackground, 
   KeyboardAvoidingView, 
-  Platform, 
-  ActivityIndicator 
+  Platform
 } from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigationTypes';
@@ -49,6 +49,14 @@ const RegisterScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Spinner
+        visible={state.isLoading}
+        textContent={'Creating account...'}
+        textStyle={styles.spinnerText}
+        overlayColor="rgba(0, 0, 0, 0.7)"
+        color="#22C55E"
+        size="large"
+      />
       <ImageBackground
         source={{ uri: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' }}
         style={styles.backgroundImage}
@@ -105,11 +113,7 @@ const RegisterScreen: React.FC = () => {
                 onPress={handleRegister}
                 disabled={state.isLoading}
               >
-                {state.isLoading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.registerButtonText}>Create Account</Text>
-                )}
+                <Text style={styles.registerButtonText}>Create Account</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.socialButton} disabled={state.isLoading}>
                 <Text style={styles.socialButtonText}>Continue with Facebook</Text>
@@ -249,6 +253,11 @@ const styles = StyleSheet.create({
   },
   loginText: {
     color: '#22C55E',
+    fontWeight: '600',
+  },
+  spinnerText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

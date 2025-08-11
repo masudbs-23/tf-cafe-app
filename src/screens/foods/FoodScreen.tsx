@@ -69,7 +69,7 @@ const FoodScreen = () => {
         price: foodItem.price,
         image: foodItem.image,
       });
-      showToast(`${foodItem.name} added to cart!`, 'success');
+      showToast('Food Added', 'success');
     } catch (error) {
       console.error('Add to cart error:', error);
       showToast('Failed to add item to cart', 'error');

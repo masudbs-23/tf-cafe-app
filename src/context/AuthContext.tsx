@@ -169,14 +169,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // Use actual API call
-      const response = await publicPost('/auth/login', { email, password });
-      
-      // Handle different response formats
-      if (response.success && response.data) {
+      const response = await publicPost('/login', { email, password });
+
+      // Handle the actual API response format
+      if (response.token) {
+        // Create a user object from the available data
+        const user: User = {
+          id: '', // We'll need to decode the token or get user info separately
+          name: email.split('@')[0], // Temporary name from email
+          email: email,
+        };
+
+        await saveToStorage('user', user);
+        await saveToStorage('token', response.token);
+
+        dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token: response.token } });
+      } else if (response.success && response.data) {
+        // Fallback for other response formats
         const { user, token } = response.data;
-        
+
         await saveToStorage('user', user);
         await saveToStorage('token', token);
 
@@ -184,7 +197,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (response.user && response.token) {
         // Alternative response format
         const { user, token } = response;
-        
+
         await saveToStorage('user', user);
         await saveToStorage('token', token);
 
@@ -195,7 +208,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Login error:', error);
       let errorMessage = 'Login failed. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.error) {
@@ -203,7 +216,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       throw new Error(errorMessage);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -214,14 +227,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: { name: string; email: string; password: string; phone?: string }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // Use actual API call
       const response = await publicPost('/auth/register', userData);
-      
+
       // Handle different response formats
       if (response.success && response.data) {
         const { user, token } = response.data;
-        
+
         await saveToStorage('user', user);
         await saveToStorage('token', token);
 
@@ -229,7 +242,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (response.user && response.token) {
         // Alternative response format
         const { user, token } = response;
-        
+
         await saveToStorage('user', user);
         await saveToStorage('token', token);
 
@@ -240,7 +253,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Register error:', error);
       let errorMessage = 'Registration failed. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.error) {
@@ -248,7 +261,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       throw new Error(errorMessage);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -263,7 +276,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await removeFromStorage('isOtpSent');
       await removeFromStorage('isOtpVerified');
       await removeFromStorage('registeredEmail');
-      
+
       dispatch({ type: 'LOGOUT' });
     } catch (error) {
       console.error('Logout error:', error);
@@ -274,14 +287,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const sendOtp = async (email: string) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // Use actual API call
       const response = await publicPost('/auth/send-otp', { email });
-      
+
       if (response.success || response.message) {
         await saveToStorage('isOtpSent', true);
         await saveToStorage('registeredEmail', email);
-        
+
         dispatch({ type: 'SET_OTP_SENT', payload: true });
         dispatch({ type: 'SET_REGISTERED_EMAIL', payload: email });
       } else {
@@ -290,7 +303,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Send OTP error:', error);
       let errorMessage = 'Failed to send OTP. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.error) {
@@ -298,7 +311,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       throw new Error(errorMessage);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -309,13 +322,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const verifyOtp = async (email: string, otp: string) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // Use actual API call
       const response = await publicPost('/auth/verify-otp', { email, otp });
-      
+
       if (response.success || response.message) {
         await saveToStorage('isOtpVerified', true);
-        
+
         dispatch({ type: 'SET_OTP_VERIFIED', payload: true });
       } else {
         throw new Error(response.message || response.error || 'Invalid OTP');
@@ -323,7 +336,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Verify OTP error:', error);
       let errorMessage = 'Invalid OTP. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.error) {
@@ -331,7 +344,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       throw new Error(errorMessage);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });

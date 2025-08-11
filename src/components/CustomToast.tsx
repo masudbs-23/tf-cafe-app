@@ -6,6 +6,7 @@ import {
   Animated,
   Dimensions,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -28,19 +29,26 @@ const CustomToast: React.FC<CustomToastProps> = ({
 }) => {
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
     if (visible) {
-      // Show toast
+      // Show toast with scale animation
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
-          duration: 300,
+          duration: 400,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 300,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scale, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
           useNativeDriver: true,
         }),
       ]).start();
@@ -66,6 +74,11 @@ const CustomToast: React.FC<CustomToastProps> = ({
         duration: 300,
         useNativeDriver: true,
       }),
+      Animated.timing(scale, {
+        toValue: 0.8,
+        duration: 300,
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       onHide();
     });
@@ -73,15 +86,16 @@ const CustomToast: React.FC<CustomToastProps> = ({
 
   if (!visible) return null;
 
-  const backgroundColor = type === 'success' ? '#22C55E' : '#ef4444';
-  const iconColor = type === 'success' ? '#22C55E' : '#ef4444';
+  const backgroundColor = type === 'success' ? '#10B981' : '#EF4444';
+  const iconName = type === 'success' ? 'check-circle' : 'error';
+  const iconColor = type === 'success' ? '#10B981' : '#EF4444';
 
   return (
     <Animated.View
       style={[
         styles.container,
         {
-          transform: [{ translateY }],
+          transform: [{ translateY }, { scale }],
           opacity,
         },
       ]}
@@ -90,12 +104,17 @@ const CustomToast: React.FC<CustomToastProps> = ({
       <View style={[styles.toast, { backgroundColor }]}>
         <View style={styles.iconContainer}>
           <Icon
-            name={type === 'success' ? 'check-circle' : 'error'}
-            size={16} // Reduced from 20 to 16
+            name={iconName}
+            size={20}
             color={iconColor}
           />
         </View>
-        <Text style={styles.message}>{message}</Text>
+        <View style={styles.contentContainer}>
+          <Text style={styles.message}>{message}</Text>
+        </View>
+        <TouchableOpacity onPress={hideToast} style={styles.closeButton}>
+          <Icon name="close" size={16} color="#ffffff" />
+        </TouchableOpacity>
       </View>
     </Animated.View>
   );
@@ -104,43 +123,59 @@ const CustomToast: React.FC<CustomToastProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 0,
-    right: 0,
-    width: width * 0.8, // 80% of screen width
+    top: 50,
+    left: 16,
+    right: 16,
     zIndex: 9999,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 8, // Reduced from 12 to 8
-    paddingTop: 35, // Reduced from 40 to 35
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
-    minHeight: 45, // Added minimum height for better centering
+    paddingVertical: 12,
+    borderRadius: 12,
+    minHeight: 56,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   iconContainer: {
-    width: 24, // Reduced from 28 to 24
-    height: 24, // Reduced from 28 to 24
-    borderRadius: 12, // Reduced from 14 to 12
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8, // Reduced from 10 to 8
+    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  contentContainer: {
+    flex: 1,
   },
   message: {
-    flex: 1,
-    fontSize: 12, // Reduced from 13 to 12
+    fontSize: 14,
     color: '#ffffff',
-    fontWeight: '500',
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  closeButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
 });
 
